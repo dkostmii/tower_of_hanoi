@@ -50,15 +50,26 @@ fn move_disk_between_rods(rod_left: &mut [i32; 10], rod_right: &mut [i32; 10]) {
         top_right = rod_right[top_right_id];
     }
 
-    rod_right[top_right_id as usize] = top_left;
+    if top_right == 0 {
+        rod_right[top_right_id] = top_left;
+    } else if top_right_id > 0 {
+        rod_right[top_right_id - 1] = top_left;
+    } else {
+        panic!("The right rod is full. Cannot place a disk on it.")
+    }
+
     rod_left[top_left_id as usize] = 0;
 }
 
-fn move_disk(rod_a: &mut [i32; 10], rod_b: &mut [i32; 10], rod_c: &mut [i32; 10]) {
-    if is_valid_move(*rod_a, *rod_b) {
-        move_disk_between_rods(rod_a, rod_b);
-    } else if is_valid_move(*rod_b, *rod_c) {
-        move_disk_between_rods(rod_b, rod_c);
+fn move_disk(rod_source: &mut [i32; 10], rod_aux: &mut [i32; 10], rod_target: &mut [i32; 10], n: i32) {
+    if n == 1 {
+        move_disk_between_rods(rod_source, rod_target);
+    } else {
+        move_disk(rod_source, rod_target, rod_aux, n - 1);
+
+        move_disk_between_rods(rod_source, rod_target);
+
+        move_disk(rod_aux, rod_source, rod_target, n - 1);
     }
 }
 
@@ -70,13 +81,8 @@ fn main() {
     println!("Initial state");
     print_rods(rod_a, rod_b, rod_c);
 
-    move_disk(&mut rod_a, &mut rod_b, &mut rod_c);
+    move_disk(&mut rod_a, &mut rod_b, &mut rod_c, 10);
 
-    println!("Iteration 1");
-    print_rods(rod_a, rod_b, rod_c);
-
-    move_disk(&mut rod_a, &mut rod_b, &mut rod_c);
-
-    println!("Iteration 2");
+    println!("Final state");
     print_rods(rod_a, rod_b, rod_c);
 }
